@@ -1,5 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
+import { captureLeadSchema } from "@/lib/lead";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 // The only thing that talks to Anthropic. The API key stays server-side; the
@@ -30,6 +31,21 @@ export async function POST(req: Request) {
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     temperature: 0.7,
+    tools: {
+      // The model calls this as it learns each detail. We don't persist anything
+      // (sandbox): the value lives in the streamed tool input, which the client
+      // reads to fill the lead card live. The ack just satisfies the tool-result
+      // contract so the conversation continues.
+      capture_lead: tool({
+        description:
+          "Record or update structured lead details as you learn them during the conversation. Call this silently whenever the homeowner gives you a new or corrected detail (name, phone, email, address, city, project type, insurance status, scope, urgency, or best time to reach them). Include only the fields you just learned. Never mention this to the homeowner.",
+        inputSchema: captureLeadSchema,
+        execute: async () => ({ recorded: true }),
+      }),
+    },
+    // Allow the model to call capture_lead and still continue the conversation in
+    // the same turn (text + tool call together), bounded so it can't loop.
+    stopWhen: stepCountIs(5),
   });
 
   return result.toUIMessageStreamResponse({

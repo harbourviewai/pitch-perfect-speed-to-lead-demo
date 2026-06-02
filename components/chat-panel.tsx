@@ -1,22 +1,10 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import type { ChatStatus, UIMessage } from "ai";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { GREETING } from "@/lib/system-prompt";
+import { useEffect, useRef } from "react";
 
-// Static config, defined once outside the component so a new transport/greeting
-// is not allocated on every render.
-const transport = new DefaultChatTransport({ api: "/api/chat" });
-
-const greeting: UIMessage = {
-  id: "greeting",
-  role: "assistant",
-  parts: [{ type: "text", text: GREETING }],
-};
-
-// Pull the visible text out of a UIMessage's parts (ignores non-text parts).
+// Pull the visible text out of a UIMessage's parts (ignores tool / non-text parts).
 function messageText(message: UIMessage): string {
   return message.parts
     .filter((part): part is { type: "text"; text: string } => part.type === "text")
@@ -24,32 +12,31 @@ function messageText(message: UIMessage): string {
     .join("");
 }
 
-export function ChatWidget() {
-  const { messages, sendMessage, status, error } = useChat({
-    transport,
-    messages: [greeting],
-  });
-  const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
+interface ChatPanelProps {
+  messages: UIMessage[];
+  input: string;
+  onInputChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  status: ChatStatus;
+  error?: Error;
+}
 
+// The homeowner-facing chat (left side of the demo). Presentational: all state
+// lives in DemoExperience so the ops view can read the same stream.
+export function ChatPanel({ messages, input, onInputChange, onSubmit, status, error }: ChatPanelProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const busy = status === "submitted" || status === "streaming";
 
-  // Keep the latest message in view as the conversation grows and streams.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, status]);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || busy) return;
-    sendMessage({ text });
-    setInput("");
-  }
+  // Only render messages that actually have visible text (skip turns that were
+  // pure tool calls, which can happen as the model records details).
+  const visibleMessages = messages.filter((m) => messageText(m).trim().length > 0);
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl">
-      {/* Header */}
       <header className="flex items-center gap-3 border-b border-neutral-800 bg-neutral-950/60 px-4 py-3">
         <Image src="/logo-badge.png" alt="Pitch Perfect" width={120} height={51} className="h-7 w-auto" />
         <div className="flex flex-col leading-tight">
@@ -61,9 +48,8 @@ export function ChatWidget() {
         </div>
       </header>
 
-      {/* Messages */}
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.map((message) => {
+        {visibleMessages.map((message) => {
           const isUser = message.role === "user";
           return (
             <div key={message.id} className={isUser ? "flex justify-end" : "flex justify-start"}>
@@ -81,7 +67,6 @@ export function ChatWidget() {
           );
         })}
 
-        {/* Typing indicator while the assistant is thinking / streaming */}
         {status === "submitted" && (
           <div className="flex justify-start">
             <div className="flex gap-1 rounded-2xl rounded-bl-sm bg-neutral-800 px-4 py-3">
@@ -99,11 +84,10 @@ export function ChatWidget() {
         )}
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-neutral-800 bg-neutral-950/60 p-3">
+      <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-neutral-800 bg-neutral-950/60 p-3">
         <input
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => onInputChange(e.target.value)}
           placeholder="Type your message..."
           aria-label="Message"
           className="flex-1 rounded-full border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-amber-500 focus:outline-none"

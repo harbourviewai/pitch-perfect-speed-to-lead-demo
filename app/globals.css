@@ -24,3 +24,21 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Lead card fields animate in as they are captured, giving the "fills in live"
+   effect on the ops view. Applied to a value span keyed by its value, so it
+   replays each time a field changes. */
+@keyframes leadPop {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lead-pop {
+  animation: leadPop 0.4s ease-out;
+}

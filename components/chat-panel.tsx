@@ -57,7 +57,7 @@ export function ChatPanel({ messages, input, onInputChange, onSubmit, status, er
                 className={[
                   "max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                   isUser
-                    ? "rounded-br-sm bg-amber-500 text-neutral-950"
+                    ? "rounded-br-sm bg-brand text-white"
                     : "rounded-bl-sm bg-neutral-800 text-neutral-100",
                 ].join(" ")}
               >
@@ -90,12 +90,12 @@ export function ChatPanel({ messages, input, onInputChange, onSubmit, status, er
           onChange={(e) => onInputChange(e.target.value)}
           placeholder="Type your message..."
           aria-label="Message"
-          className="flex-1 rounded-full border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-amber-500 focus:outline-none"
+          className="flex-1 rounded-full border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-brand focus:outline-none"
         />
         <button
           type="submit"
           disabled={!input.trim() || busy}
-          className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-neutral-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-bright disabled:cursor-not-allowed disabled:opacity-40"
         >
           Send
         </button>

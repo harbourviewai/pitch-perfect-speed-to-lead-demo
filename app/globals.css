@@ -12,6 +12,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Pitch Perfect brand palette, pulled from the logo (black badge + metallic
+   magenta-pink wordmark). `brand` is the pink accent; `jobtread` is the teal
+   used to style the mock JobTread file so it reads as a separate system. */
+@theme {
+  --color-brand: #e0218a;
+  --color-brand-bright: #ff5cb8;
+  --color-brand-deep: #8e1750;
+  --color-jobtread: #0d9488;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

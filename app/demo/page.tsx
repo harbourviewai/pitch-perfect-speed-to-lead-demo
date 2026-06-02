@@ -1,10 +1,10 @@
 import { DemoExperience } from "@/components/demo-experience";
 
-// The demo: homeowner chat on the left, the live ops lead card on the right.
-// M3 adds the AI summary, the JobTread file, the speed timer, and full branding.
+// The demo: Pitch Perfect chat on the left, the live JobTread customer file on
+// the right. M4 adds the speed timer and the "7 days to under a minute" contrast.
 export default function DemoPage() {
   return (
-    <div className="flex flex-1 items-center justify-center bg-neutral-950 p-4">
+    <div className="flex flex-1 justify-center bg-neutral-950 px-4 py-6">
       <DemoExperience />
     </div>
   );

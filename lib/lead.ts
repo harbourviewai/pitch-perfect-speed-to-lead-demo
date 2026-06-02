@@ -35,6 +35,22 @@ export const captureLeadSchema = z.object({
 
 export type LeadFields = z.infer<typeof captureLeadSchema>;
 
+/**
+ * `finalize_lead` fires once at handoff. It produces the human-readable summary
+ * and the routing recommendation that land on the JobTread file. Kept separate
+ * from capture so the summary is written deliberately at the close, not midstream.
+ */
+export const finalizeLeadSchema = z.object({
+  summary: z
+    .string()
+    .describe("A 2 to 3 sentence summary in the team's voice. What a human needs to read in 5 seconds to know exactly what to do. No fluff."),
+  routing: z
+    .string()
+    .describe("Which entity handles it plus the suggested next step, e.g. 'Roofing — Lance to call re: State Farm claim' or 'Builds — schedule a kitchen walkthrough'."),
+});
+
+export type FinalizedLead = z.infer<typeof finalizeLeadSchema>;
+
 // Display order and labels for the lead card.
 export const LEAD_FIELD_ORDER: Array<keyof LeadFields> = [
   "name",

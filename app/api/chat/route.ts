@@ -1,6 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
-import { captureLeadSchema } from "@/lib/lead";
+import { captureLeadSchema, finalizeLeadSchema } from "@/lib/lead";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 // The only thing that talks to Anthropic. The API key stays server-side; the
@@ -41,6 +41,15 @@ export async function POST(req: Request) {
           "Record or update structured lead details as you learn them during the conversation. Call this silently whenever the homeowner gives you a new or corrected detail (name, phone, email, address, city, project type, insurance status, scope, urgency, or best time to reach them). Include only the fields you just learned. Never mention this to the homeowner.",
         inputSchema: captureLeadSchema,
         execute: async () => ({ recorded: true }),
+      }),
+      // Called once at handoff. Produces the team-facing summary and routing that
+      // land on the JobTread file. Like capture_lead, the value lives in the
+      // streamed input; the ack just satisfies the tool-result contract.
+      finalize_lead: tool({
+        description:
+          "Call this exactly once, when you have what you need and are wrapping up the conversation (you have at least a name, a phone number, and a city or address). Provide a short team-facing summary and a routing recommendation. Then give your warm closing message. Never mention this tool to the homeowner.",
+        inputSchema: finalizeLeadSchema,
+        execute: async () => ({ finalized: true }),
       }),
     },
     // Allow the model to call capture_lead and still continue the conversation in

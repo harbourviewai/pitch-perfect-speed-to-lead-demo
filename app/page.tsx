@@ -18,7 +18,7 @@ export default function Home() {
         />
 
         <div className="flex flex-col items-center gap-4">
-          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-amber-300">
+          <span className="rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-brand-bright">
             Speed to Lead
           </span>
           <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-neutral-50 sm:text-4xl">

@@ -51,6 +51,17 @@ export const finalizeLeadSchema = z.object({
 
 export type FinalizedLead = z.infer<typeof finalizeLeadSchema>;
 
+/**
+ * A photo the homeowner attaches. Demo stub: held in client memory as an object
+ * URL and shown as a thumbnail in the chat and on the JobTread file. Nothing is
+ * uploaded or stored server-side.
+ */
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+}
+
 // Display order and labels for the lead card.
 export const LEAD_FIELD_ORDER: Array<keyof LeadFields> = [
   "name",

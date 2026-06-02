@@ -3,6 +3,7 @@
 import type { ChatStatus, UIMessage } from "ai";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import type { Attachment } from "@/lib/lead";
 
 // Pull the visible text out of a UIMessage's parts (ignores tool / non-text parts).
 function messageText(message: UIMessage): string {
@@ -19,13 +20,33 @@ interface ChatPanelProps {
   onSubmit: (e: React.FormEvent) => void;
   status: ChatStatus;
   error?: Error;
+  attachments: Attachment[];
+  onAttach: (file: File) => void;
+  attachDisabled?: boolean;
 }
 
 // The homeowner-facing chat (left side of the demo). Presentational: all state
 // lives in DemoExperience so the ops view can read the same stream.
-export function ChatPanel({ messages, input, onInputChange, onSubmit, status, error }: ChatPanelProps) {
+export function ChatPanel({
+  messages,
+  input,
+  onInputChange,
+  onSubmit,
+  status,
+  error,
+  attachments,
+  onAttach,
+  attachDisabled,
+}: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const busy = status === "submitted" || status === "streaming";
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) onAttach(file);
+    e.target.value = ""; // allow re-selecting the same file
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -84,7 +105,35 @@ export function ChatPanel({ messages, input, onInputChange, onSubmit, status, er
         )}
       </div>
 
+      {/* Attached photo thumbnails (stub: object URLs, not uploaded anywhere) */}
+      {attachments.length > 0 && (
+        <div className="flex flex-wrap gap-2 border-t border-neutral-800 bg-neutral-950/60 px-3 pt-3">
+          {attachments.map((a) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={a.id}
+              src={a.url}
+              alt={a.name}
+              className="lead-pop h-12 w-12 rounded-lg object-cover ring-1 ring-neutral-700"
+            />
+          ))}
+        </div>
+      )}
+
       <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-neutral-800 bg-neutral-950/60 p-3">
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={attachDisabled}
+          aria-label="Attach a photo"
+          title="Attach a photo"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-700 text-neutral-400 transition-colors hover:border-brand hover:text-brand-bright disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+          </svg>
+        </button>
         <input
           value={input}
           onChange={(e) => onInputChange(e.target.value)}

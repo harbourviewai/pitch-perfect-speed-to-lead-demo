@@ -1,6 +1,6 @@
 "use client";
 
-import { entityForProject, formatLeadValue, type FinalizedLead, type LeadFields } from "@/lib/lead";
+import { entityForProject, formatLeadValue, type Attachment, type FinalizedLead, type LeadFields } from "@/lib/lead";
 
 // The mock JobTread customer file (right side of the demo). It is intentionally
 // light themed so it reads as a separate system from the dark Pitch Perfect chat:
@@ -8,7 +8,15 @@ import { entityForProject, formatLeadValue, type FinalizedLead, type LeadFields 
 // model captures them; the AI summary lands when finalize_lead fires.
 //
 // Sandbox only: nothing is written to a real JobTread. This is a styled mock.
-export function JobTreadFile({ lead, finalized }: { lead: LeadFields; finalized: FinalizedLead | null }) {
+export function JobTreadFile({
+  lead,
+  finalized,
+  attachments = [],
+}: {
+  lead: LeadFields;
+  finalized: FinalizedLead | null;
+  attachments?: Attachment[];
+}) {
   const fileCreated = Boolean(lead.name || lead.project_type || lead.city);
   const entity = entityForProject(lead.project_type);
   const initials = getInitials(lead.name);
@@ -88,6 +96,26 @@ export function JobTreadFile({ lead, finalized }: { lead: LeadFields; finalized:
           />
           <Row label="Best time to reach" value={lead.preferred_contact_time} />
         </Section>
+
+        {/* Attachments (photo stub) */}
+        {attachments.length > 0 && (
+          <div className="border-b border-zinc-100 px-4 py-3">
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Attachments ({attachments.length})
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((a) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={a.id}
+                  src={a.url}
+                  alt={a.name}
+                  className="lead-pop h-14 w-14 rounded-md object-cover ring-1 ring-zinc-200"
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* AI summary, populated at handoff */}
         <div className="border-t border-zinc-100 px-4 py-4">
